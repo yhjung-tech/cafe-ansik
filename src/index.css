@@ -1,111 +1,367 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --bg: #f6f2ea;
+  --surface: #ffffff;
+  --ink: #37302a;
+  --ink-soft: #877c6f;
+  --line: #e7dfd2;
+  --accent: #5f7d5a;
+  --accent-deep: #4a6346;
+  --ice: #3a6ea5;
+  --ice-bg: #e8f0f8;
+  --hot: #b05138;
+  --hot-bg: #f9e9e4;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  font-family:
+    'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR',
+    -apple-system, system-ui, sans-serif;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
+  max-width: 480px;
   margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
+  min-height: 100dvh;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app {
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
+  min-height: 100dvh;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+.app-header {
+  padding: 20px 20px 12px;
+  text-align: center;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+.app-header h1 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.02em;
 }
-h2 {
+
+.app-header p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.app-main {
+  flex: 1;
+  padding: 0 16px calc(84px + env(safe-area-inset-bottom));
+}
+
+.view {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.entry-date {
+  margin: 4px 0 0;
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.entry-hint {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* 음료 목록 + 스테퍼 */
+.drink-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.drink-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+
+.drink-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.drink-name {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.drink-temp {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 999px;
+}
+
+.temp-ice {
+  color: var(--ice);
+  background: var(--ice-bg);
+}
+
+.temp-hot {
+  color: var(--hot);
+  background: var(--hot-bg);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stepper-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
   font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+  font-weight: 600;
+  line-height: 1;
+  color: var(--accent-deep);
 }
-p {
+
+.stepper-btn:active {
+  background: var(--line);
+}
+
+.stepper-input {
+  width: 56px;
+  height: 48px;
+  text-align: center;
+  font: inherit;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.stepper-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.stepper-input::-webkit-outer-spin-button,
+.stepper-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+.stepper-input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
-code {
+.entry-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px 0;
   font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  color: var(--ink-soft);
+}
+
+.entry-total strong {
+  font-size: 19px;
+  color: var(--ink);
+}
+
+.save-btn {
+  height: 56px;
+  border-radius: 16px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.save-btn:active {
+  background: var(--accent-deep);
+}
+
+.save-note {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--accent-deep);
+}
+
+.empty-note {
+  margin: 0;
+  padding: 12px 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+/* 추이 차트 */
+.chart {
+  display: flex;
+  align-items: stretch;
+  gap: 3px;
+  height: 180px;
+  padding: 12px 10px 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.chart-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.chart-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  min-height: 14px;
+  white-space: pre;
+}
+
+.chart-bar-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-bottom: 1px solid var(--line);
+}
+
+.chart-bar {
+  width: 70%;
+  max-width: 18px;
+  min-height: 2px;
+  background: var(--accent);
+  border-radius: 4px 4px 0 0;
+  opacity: 0.55;
+}
+
+.chart-col.selected .chart-bar {
+  opacity: 1;
+}
+
+.chart-day {
+  font-size: 10px;
+  color: var(--ink-soft);
+}
+
+.chart-col.selected .chart-day {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* 일자 상세 */
+.day-detail {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+
+.day-detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 600;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.day-detail-head strong {
+  font-size: 18px;
+  color: var(--accent-deep);
+}
+
+.day-detail-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0 0;
+}
+
+.day-detail-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 15px;
+}
+
+.day-detail-count {
+  font-weight: 600;
+}
+
+/* 하단 탭 바 */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  gap: 8px;
+}
+
+.tab-bar button {
+  flex: 1;
+  height: 52px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.tab-bar button.active {
+  background: var(--bg);
+  color: var(--accent-deep);
 }
