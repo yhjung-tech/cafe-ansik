@@ -5,6 +5,7 @@ import {
   itemId,
   soldTotal,
   staffTotal,
+  totalCups,
   toDateKey,
   todayKey,
 } from './drinks.js'
@@ -54,6 +55,7 @@ export default function TrendView() {
         key,
         date,
         record,
+        total: record ? totalCups(record.drinks) : 0,
         sold: record ? soldTotal(record.drinks) : 0,
         staff: record ? staffTotal(record.drinks) : 0,
       }
@@ -68,14 +70,14 @@ export default function TrendView() {
     )
   }
 
-  const maxSold = Math.max(1, ...days.map((d) => d.sold))
+  const maxTotal = Math.max(1, ...days.map((d) => d.total))
   const selected = days.find((d) => d.key === selectedKey) ?? days[days.length - 1]
   const hasAnyData = days.some((d) => d.record !== null)
 
   return (
     <div className="view">
       <p className="entry-hint">
-        최근 {DAYS}일 판매 추이 (직원 소비 제외) · 막대를 누르면 상세가 보여요
+        최근 {DAYS}일 판매 추이 (직원 포함) · 막대를 누르면 상세가 보여요
       </p>
 
       {error && <p className="error-note">{error}</p>}
@@ -90,15 +92,15 @@ export default function TrendView() {
             key={day.key}
             className={`chart-col${day.key === selected.key ? ' selected' : ''}`}
             onClick={() => setSelectedKey(day.key)}
-            aria-label={`${day.date.getMonth() + 1}월 ${day.date.getDate()}일 ${day.sold}잔`}
+            aria-label={`${day.date.getMonth() + 1}월 ${day.date.getDate()}일 ${day.total}잔`}
           >
             <span className="chart-value">
-              {day.key === selected.key && day.sold > 0 ? day.sold : ' '}
+              {day.key === selected.key && day.total > 0 ? day.total : ' '}
             </span>
             <span className="chart-bar-track">
               <span
                 className="chart-bar"
-                style={{ height: `${(day.sold / maxSold) * 100}%` }}
+                style={{ height: `${(day.total / maxTotal) * 100}%` }}
               />
             </span>
             <span className="chart-day">{day.date.getDate()}</span>
@@ -112,7 +114,7 @@ export default function TrendView() {
             {selected.date.getMonth() + 1}월 {selected.date.getDate()}일 (
             {WEEKDAYS[selected.date.getDay()]})
           </span>
-          <strong>{selected.sold}잔</strong>
+          <strong>{selected.total}잔</strong>
         </div>
         {selected.record ? (
           <>
@@ -137,7 +139,9 @@ export default function TrendView() {
               <p className="day-detail-note">📝 {selected.record.note}</p>
             )}
             <div className="day-detail-foot">
-              <span>직원 소비 {selected.staff}잔</span>
+              <span>
+                판매 {selected.sold}잔 · 직원 {selected.staff}잔
+              </span>
               <span>마감자 {selected.record.closer ?? '미지정'}</span>
             </div>
           </>

@@ -7,6 +7,7 @@ import {
   emptyDrinks,
   soldTotal,
   staffTotal,
+  totalCups,
   todayKey,
 } from './drinks.js'
 import { getDailySales, saveDailySales } from './storage.js'
@@ -179,12 +180,12 @@ export default function EntryView() {
       ))}
 
       <div className="entry-total">
-        <span>오늘 판매 합계 (직원 제외)</span>
-        <strong>{soldTotal(drinks)}잔</strong>
+        <span>오늘 합계 (직원 포함)</span>
+        <strong>{totalCups(drinks)}잔</strong>
       </div>
       <div className="entry-total sub">
-        <span>직원 소비</span>
-        <span>{staffTotal(drinks)}잔</span>
+        <span>판매 {soldTotal(drinks)}잔</span>
+        <span>직원 {staffTotal(drinks)}잔</span>
       </div>
 
       <section className="closer-section">

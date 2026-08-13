@@ -45,6 +45,11 @@ export function staffTotal(drinks) {
   return TEAS.reduce((sum, tea) => sum + (drinks[itemId(tea.id, 'staff')] || 0), 0)
 }
 
+// 전체 잔 수 (판매 + 직원 소비)
+export function totalCups(drinks) {
+  return ITEM_IDS.reduce((sum, id) => sum + (drinks[id] || 0), 0)
+}
+
 // 기기 로컬 시간 기준 YYYY-MM-DD (toISOString은 UTC라 새벽에 날짜가 밀림)
 export function toDateKey(date) {
   const y = date.getFullYear()
