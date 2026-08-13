@@ -11,8 +11,9 @@ import {
 } from './drinks.js'
 import { getDailySales, saveDailySales } from './storage.js'
 
-function formatToday() {
-  return new Date().toLocaleDateString('ko-KR', {
+function formatDateKey(key) {
+  const [y, m, d] = key.split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -26,7 +27,7 @@ function clampCount(value) {
 }
 
 export default function EntryView() {
-  const [dateKey] = useState(todayKey)
+  const [dateKey, setDateKey] = useState(todayKey)
   const [drinks, setDrinks] = useState(emptyDrinks)
   const [closer, setCloser] = useState(null)
   const [status, setStatus] = useState('loading') // loading | ready | saving
@@ -34,13 +35,13 @@ export default function EntryView() {
 
   useEffect(() => {
     let cancelled = false
+    setStatus('loading')
+    setMessage(null)
     getDailySales(dateKey)
       .then((record) => {
         if (cancelled) return
-        if (record) {
-          setDrinks({ ...emptyDrinks(), ...record.drinks })
-          setCloser(record.closer)
-        }
+        setDrinks({ ...emptyDrinks(), ...(record?.drinks ?? {}) })
+        setCloser(record?.closer ?? null)
         setStatus('ready')
       })
       .catch((err) => {
@@ -79,19 +80,54 @@ export default function EntryView() {
     }
   }
 
+  const isToday = dateKey === todayKey()
+
+  const datePicker = (
+    <div className="date-row">
+      <label className="date-label" htmlFor="entry-date-input">
+        날짜
+      </label>
+      <input
+        id="entry-date-input"
+        className="date-input"
+        type="date"
+        value={dateKey}
+        max={todayKey()}
+        onChange={(e) => {
+          if (e.target.value) setDateKey(e.target.value)
+        }}
+      />
+      {!isToday && (
+        <button
+          type="button"
+          className="today-btn"
+          onClick={() => setDateKey(todayKey())}
+        >
+          오늘로
+        </button>
+      )}
+    </div>
+  )
+
   if (status === 'loading') {
     return (
       <div className="view">
-        <p className="entry-date">{formatToday()}</p>
-        <p className="empty-note">오늘 기록을 불러오는 중…</p>
+        <p className="entry-date">{formatDateKey(dateKey)}</p>
+        {datePicker}
+        <p className="empty-note">기록을 불러오는 중…</p>
       </div>
     )
   }
 
   return (
     <div className="view">
-      <p className="entry-date">{formatToday()}</p>
-      <p className="entry-hint">오늘 판매한 잔 수를 입력해 주세요</p>
+      <p className="entry-date">{formatDateKey(dateKey)}</p>
+      {datePicker}
+      {isToday ? (
+        <p className="entry-hint">오늘 판매한 잔 수를 입력해 주세요</p>
+      ) : (
+        <p className="date-warn">지난 날짜의 기록을 입력하고 있어요</p>
+      )}
 
       {TEAS.map((tea) => (
         <section key={tea.id} className="tea-section">

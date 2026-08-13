@@ -92,6 +92,55 @@ button {
   text-align: center;
 }
 
+/* 날짜 선택 */
+.date-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.date-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.date-input {
+  height: 44px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.date-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.today-btn {
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--accent);
+  color: var(--accent-deep);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.date-warn {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hot);
+  text-align: center;
+}
+
 /* 차 섹션 */
 .tea-section {
   background: var(--surface);
