@@ -1,5 +1,14 @@
-import { useState } from 'react'
-import { DRINKS, emptySales, todayKey } from './drinks.js'
+import { useEffect, useState } from 'react'
+import {
+  TEAS,
+  VARIANTS,
+  CLOSERS,
+  itemId,
+  emptyDrinks,
+  soldTotal,
+  staffTotal,
+  todayKey,
+} from './drinks.js'
 import { getDailySales, saveDailySales } from './storage.js'
 
 function formatToday() {
@@ -18,78 +27,162 @@ function clampCount(value) {
 
 export default function EntryView() {
   const [dateKey] = useState(todayKey)
-  const [sales, setSales] = useState(() => ({
-    ...emptySales(),
-    ...(getDailySales(todayKey()) ?? {}),
-  }))
-  const [savedAt, setSavedAt] = useState(null)
+  const [drinks, setDrinks] = useState(emptyDrinks)
+  const [closer, setCloser] = useState(null)
+  const [status, setStatus] = useState('loading') // loading | ready | saving
+  const [message, setMessage] = useState(null) // {type: 'ok'|'error', text}
+
+  useEffect(() => {
+    let cancelled = false
+    getDailySales(dateKey)
+      .then((record) => {
+        if (cancelled) return
+        if (record) {
+          setDrinks({ ...emptyDrinks(), ...record.drinks })
+          setCloser(record.closer)
+        }
+        setStatus('ready')
+      })
+      .catch((err) => {
+        if (cancelled) return
+        setStatus('ready')
+        setMessage({ type: 'error', text: err.message })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [dateKey])
 
   const update = (id, value) => {
-    setSales((prev) => ({ ...prev, [id]: clampCount(value) }))
-    setSavedAt(null)
+    setDrinks((prev) => ({ ...prev, [id]: clampCount(value) }))
+    setMessage(null)
   }
 
-  const handleSave = () => {
-    saveDailySales(dateKey, sales)
-    setSavedAt(new Date().toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' }))
+  const handleSave = async () => {
+    if (!closer) {
+      setMessage({ type: 'error', text: '마감자를 선택해 주세요' })
+      return
+    }
+    setStatus('saving')
+    setMessage(null)
+    try {
+      await saveDailySales(dateKey, { drinks, closer })
+      const time = new Date().toLocaleTimeString('ko-KR', {
+        hour: 'numeric',
+        minute: '2-digit',
+      })
+      setMessage({ type: 'ok', text: `${time}에 저장되었습니다 (마감자: ${closer})` })
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message })
+    } finally {
+      setStatus('ready')
+    }
   }
 
-  const total = DRINKS.reduce((sum, d) => sum + (sales[d.id] || 0), 0)
+  if (status === 'loading') {
+    return (
+      <div className="view">
+        <p className="entry-date">{formatToday()}</p>
+        <p className="empty-note">오늘 기록을 불러오는 중…</p>
+      </div>
+    )
+  }
 
   return (
     <div className="view">
       <p className="entry-date">{formatToday()}</p>
       <p className="entry-hint">오늘 판매한 잔 수를 입력해 주세요</p>
 
-      <ul className="drink-list">
-        {DRINKS.map((drink) => (
-          <li key={drink.id} className="drink-row">
-            <div className="drink-label">
-              <span className="drink-name">{drink.name}</span>
-              <span className={`drink-temp temp-${drink.temp.toLowerCase()}`}>{drink.temp}</span>
-            </div>
-            <div className="stepper">
-              <button
-                type="button"
-                className="stepper-btn"
-                aria-label={`${drink.name} ${drink.temp} 1잔 빼기`}
-                onClick={() => update(drink.id, (sales[drink.id] || 0) - 1)}
-              >
-                −
-              </button>
-              <input
-                className="stepper-input"
-                type="number"
-                inputMode="numeric"
-                min="0"
-                max="999"
-                value={sales[drink.id] ?? 0}
-                aria-label={`${drink.name} ${drink.temp} 잔 수`}
-                onFocus={(e) => e.target.select()}
-                onChange={(e) => update(drink.id, e.target.valueAsNumber)}
-              />
-              <button
-                type="button"
-                className="stepper-btn"
-                aria-label={`${drink.name} ${drink.temp} 1잔 더하기`}
-                onClick={() => update(drink.id, (sales[drink.id] || 0) + 1)}
-              >
-                +
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      {TEAS.map((tea) => (
+        <section key={tea.id} className="tea-section">
+          <h2 className="tea-title">{tea.name}</h2>
+          <ul className="drink-list">
+            {VARIANTS.map((variant) => {
+              const id = itemId(tea.id, variant.id)
+              return (
+                <li key={id} className="drink-row">
+                  <span className={`drink-temp temp-${variant.id}`}>
+                    {variant.label}
+                  </span>
+                  <div className="stepper">
+                    <button
+                      type="button"
+                      className="stepper-btn"
+                      aria-label={`${tea.name} ${variant.label} 1잔 빼기`}
+                      onClick={() => update(id, (drinks[id] || 0) - 1)}
+                    >
+                      −
+                    </button>
+                    <input
+                      className="stepper-input"
+                      type="number"
+                      inputMode="numeric"
+                      min="0"
+                      max="999"
+                      value={drinks[id] ?? 0}
+                      aria-label={`${tea.name} ${variant.label} 잔 수`}
+                      onFocus={(e) => e.target.select()}
+                      onChange={(e) => update(id, e.target.valueAsNumber)}
+                    />
+                    <button
+                      type="button"
+                      className="stepper-btn"
+                      aria-label={`${tea.name} ${variant.label} 1잔 더하기`}
+                      onClick={() => update(id, (drinks[id] || 0) + 1)}
+                    >
+                      +
+                    </button>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      ))}
 
       <div className="entry-total">
-        <span>오늘 합계</span>
-        <strong>{total}잔</strong>
+        <span>오늘 판매 합계 (직원 제외)</span>
+        <strong>{soldTotal(drinks)}잔</strong>
+      </div>
+      <div className="entry-total sub">
+        <span>직원 소비</span>
+        <span>{staffTotal(drinks)}잔</span>
       </div>
 
-      <button type="button" className="save-btn" onClick={handleSave}>
-        저장하기
+      <section className="closer-section">
+        <h2 className="tea-title">마감자</h2>
+        <div className="closer-picker" role="radiogroup" aria-label="마감자 선택">
+          {CLOSERS.map((name) => (
+            <button
+              type="button"
+              key={name}
+              role="radio"
+              aria-checked={closer === name}
+              className={`closer-btn${closer === name ? ' selected' : ''}`}
+              onClick={() => {
+                setCloser(name)
+                setMessage(null)
+              }}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <button
+        type="button"
+        className="save-btn"
+        disabled={status === 'saving'}
+        onClick={handleSave}
+      >
+        {status === 'saving' ? '저장 중…' : '저장하기'}
       </button>
-      {savedAt && <p className="save-note">{savedAt}에 저장되었습니다</p>}
+      {message && (
+        <p className={message.type === 'ok' ? 'save-note' : 'error-note'}>
+          {message.text}
+        </p>
+      )}
     </div>
   )
 }
