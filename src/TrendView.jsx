@@ -133,6 +133,9 @@ export default function TrendView() {
                 </ul>
               </div>
             ))}
+            {selected.record.note && (
+              <p className="day-detail-note">📝 {selected.record.note}</p>
+            )}
             <div className="day-detail-foot">
               <span>직원 소비 {selected.staff}잔</span>
               <span>마감자 {selected.record.closer ?? '미지정'}</span>

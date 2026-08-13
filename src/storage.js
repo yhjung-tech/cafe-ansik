@@ -13,18 +13,18 @@ const TABLE = 'cafe_ansik_daily_sales'
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
 function toRecord(row) {
-  return { drinks: row.drinks ?? {}, closer: row.closer ?? null }
+  return { drinks: row.drinks ?? {}, closer: row.closer ?? null, note: row.note ?? '' }
 }
 
 /**
  * 특정 날짜의 기록을 가져온다.
  * @param {string} dateKey - 'YYYY-MM-DD'
- * @returns {Promise<{drinks: Record<string, number>, closer: string|null} | null>}
+ * @returns {Promise<{drinks: Record<string, number>, closer: string|null, note: string} | null>}
  */
 export async function getDailySales(dateKey) {
   const { data, error } = await supabase
     .from(TABLE)
-    .select('drinks, closer')
+    .select('drinks, closer, note')
     .eq('sale_date', dateKey)
     .maybeSingle()
   if (error) throw new Error(`불러오기 실패: ${error.message}`)
@@ -34,13 +34,14 @@ export async function getDailySales(dateKey) {
 /**
  * 특정 날짜의 기록을 저장(덮어쓰기)한다.
  * @param {string} dateKey - 'YYYY-MM-DD'
- * @param {{drinks: Record<string, number>, closer: string|null}} record
+ * @param {{drinks: Record<string, number>, closer: string|null, note: string}} record
  */
 export async function saveDailySales(dateKey, record) {
   const { error } = await supabase.from(TABLE).upsert({
     sale_date: dateKey,
     drinks: record.drinks,
     closer: record.closer,
+    note: record.note || null,
     updated_at: new Date().toISOString(),
   })
   if (error) throw new Error(`저장 실패: ${error.message}`)
@@ -48,12 +49,12 @@ export async function saveDailySales(dateKey, record) {
 
 /**
  * 전체 기록을 가져온다.
- * @returns {Promise<Record<string, {drinks: Record<string, number>, closer: string|null}>>}
+ * @returns {Promise<Record<string, {drinks: Record<string, number>, closer: string|null, note: string}>>}
  */
 export async function getAllSales() {
   const { data, error } = await supabase
     .from(TABLE)
-    .select('sale_date, drinks, closer')
+    .select('sale_date, drinks, closer, note')
   if (error) throw new Error(`불러오기 실패: ${error.message}`)
   const all = {}
   for (const row of data ?? []) all[row.sale_date] = toRecord(row)

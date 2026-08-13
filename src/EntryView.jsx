@@ -30,6 +30,7 @@ export default function EntryView() {
   const [dateKey, setDateKey] = useState(todayKey)
   const [drinks, setDrinks] = useState(emptyDrinks)
   const [closer, setCloser] = useState(null)
+  const [note, setNote] = useState('')
   const [status, setStatus] = useState('loading') // loading | ready | saving
   const [message, setMessage] = useState(null) // {type: 'ok'|'error', text}
 
@@ -42,6 +43,7 @@ export default function EntryView() {
         if (cancelled) return
         setDrinks({ ...emptyDrinks(), ...(record?.drinks ?? {}) })
         setCloser(record?.closer ?? null)
+        setNote(record?.note ?? '')
         setStatus('ready')
       })
       .catch((err) => {
@@ -67,7 +69,7 @@ export default function EntryView() {
     setStatus('saving')
     setMessage(null)
     try {
-      await saveDailySales(dateKey, { drinks, closer })
+      await saveDailySales(dateKey, { drinks, closer, note: note.trim() })
       const time = new Date().toLocaleTimeString('ko-KR', {
         hour: 'numeric',
         minute: '2-digit',
@@ -184,6 +186,21 @@ export default function EntryView() {
         <span>직원 소비</span>
         <span>{staffTotal(drinks)}잔</span>
       </div>
+
+      <section className="closer-section">
+        <h2 className="tea-title">특이사항</h2>
+        <textarea
+          className="note-input"
+          rows={3}
+          maxLength={500}
+          placeholder="예: 우유 재고 부족, 오후에 단체 손님, 기계 이상 등"
+          value={note}
+          onChange={(e) => {
+            setNote(e.target.value)
+            setMessage(null)
+          }}
+        />
+      </section>
 
       <section className="closer-section">
         <h2 className="tea-title">마감자</h2>
