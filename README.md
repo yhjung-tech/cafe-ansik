@@ -39,6 +39,33 @@ npm run lint     # oxlint
   RLS 정책이 익명 읽기/쓰기를 허용합니다. URL을 아는 사람은 누구나 기록을 읽고
   수정할 수 있으니, 외부에 링크를 공유하지 마세요. 나중에 Supabase Auth로 잠글 수 있습니다.
 
+## 슬랙 마감 보고 자동 발송
+
+매일 **오전 9시(KST)** 에 전날 마감 기록(판매량 · 마감자 · 특이사항)이 슬랙 채널
+`#오리진-오피스-알림봇` (`C0AULCS43JT`)으로 자동 발송됩니다. 전날 기록이 없으면 "기록 없음" 안내가 갑니다.
+
+- 별도 서버 없이 Supabase 안에서만 동작합니다:
+  `pg_cron`(00:00 UTC) → `cafe_ansik_send_slack_report()` → `pg_net` → Slack `chat.postMessage`
+- 설정 SQL: `supabase/migrations/20260902_cafe_ansik_slack_daily_report.sql` (Supabase 프로젝트에 적용 완료)
+- 봇 토큰은 Supabase Vault 시크릿 `cafe_ansik_slack_bot_token` 에서 읽습니다.
+  토큰이 없으면 발송을 건너뛰고 `cafe_ansik_slack_report_log` 에 남깁니다.
+- 슬랙 앱 요구사항: Bot Token Scope `chat:write`, 봇을 채널에 초대 (`/invite @봇이름`)
+
+수동 실행 / 확인 (Supabase SQL Editor):
+
+```sql
+select public.cafe_ansik_send_slack_report('2026-09-01');  -- 특정 날짜 보고 (다시) 보내기
+select public.cafe_ansik_check_slack_report();              -- 몇 초 뒤 Slack 응답 수집
+select * from public.cafe_ansik_slack_report_log order by id desc limit 10;
+```
+
+봇 토큰 등록 / 교체:
+
+```sql
+select vault.create_secret('xoxb-…', 'cafe_ansik_slack_bot_token', '카페 안식 마감 보고 슬랙 봇');
+select vault.update_secret(id, 'xoxb-새토큰') from vault.secrets where name = 'cafe_ansik_slack_bot_token';
+```
+
 ## 구조
 
 ```
@@ -50,4 +77,6 @@ src/
   drinks.js      # 차/분류/마감자 목록, 날짜 유틸
   storage.js     # 데이터 레이어 (Supabase)
   index.css      # 전체 스타일
+supabase/
+  migrations/    # 슬랙 마감 보고 자동 발송 SQL (pg_cron + pg_net)
 ```
