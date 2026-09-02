@@ -50,6 +50,8 @@ npm run lint     # oxlint
 - 봇 토큰은 Supabase Vault 시크릿 `cafe_ansik_slack_bot_token` 에서 읽습니다.
   토큰이 없으면 발송을 건너뛰고 `cafe_ansik_slack_report_log` 에 남깁니다.
 - 슬랙 앱 요구사항: Bot Token Scope `chat:write`, 봇을 채널에 초대 (`/invite @봇이름`)
+- 슬랙 앱 매니페스트: `supabase/slack-app-manifest.yaml`
+  (api.slack.com/apps → Create New App → From a manifest 에 붙여넣기 → Install to Workspace → Bot User OAuth Token 복사)
 
 수동 실행 / 확인 (Supabase SQL Editor):
 

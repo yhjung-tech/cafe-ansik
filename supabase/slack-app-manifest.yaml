@@ -1,0 +1,20 @@
+_metadata:
+  major_version: 1
+  minor_version: 1
+display_information:
+  name: 카페 안식
+  description: 카페 안식 마감 보고(판매량·마감자·특이사항)를 매일 아침 9시에 전달합니다
+  background_color: "#6b4f3a"
+features:
+  bot_user:
+    display_name: 카페 안식
+    always_online: true
+oauth_config:
+  scopes:
+    bot:
+      - chat:write
+      - chat:write.public
+settings:
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false
