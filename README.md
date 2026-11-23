@@ -43,14 +43,17 @@ npm run lint     # oxlint
 
 매일 **오전 9시(KST)** 에 전날 마감 기록(판매량 · 마감자 · 특이사항)이 슬랙 채널
 `#오리진-오피스-알림봇` (`C0AULCS43JT`)으로 자동 발송됩니다. 전날 기록이 없으면 "기록 없음" 안내가 갑니다.
-같은 메시지가 유진호(`U0C1T1386SJ`)에게 카페 안식 봇 DM으로도 갑니다.
+같은 메시지가 윤진형(`U0CKV9H4S9H`)에게 카페 안식 봇 DM으로도 갑니다
+(2026-11-23 수신자 교체 — 그 전에는 유진호 `U0C1T1386SJ`).
 
 - 별도 서버 없이 Supabase 안에서만 동작합니다:
   `pg_cron`(00:00 UTC) → `cafe_ansik_send_slack_report()` → `pg_net` → Slack `chat.postMessage`
 - 설정 SQL: `supabase/migrations/20260902_cafe_ansik_slack_daily_report.sql` (Supabase 프로젝트에 적용 완료)
-- DM 수신자: `supabase/migrations/20261006_cafe_ansik_slack_report_dm.sql` — 수신자마다 pg_cron 잡 하나
-  (`cafe-ansik-slack-report-dm-jh-yoo` → `cafe_ansik_send_slack_report(p_channel => 'U0C1T1386SJ')`).
+- DM 수신자: `supabase/migrations/20261123_cafe_ansik_slack_report_dm_jh_yoon.sql` — 수신자마다 pg_cron 잡 하나
+  (`cafe-ansik-slack-report-dm-jh-yoon` → `cafe_ansik_send_slack_report(p_channel => 'U0CKV9H4S9H')`).
   `p_channel` 에 사용자 ID(U…)를 넣으면 봇 DM으로 갑니다.
+  처음 만든 잡(`20261006_cafe_ansik_slack_report_dm.sql`, 유진호 `cafe-ansik-slack-report-dm-jh-yoo`)은 2026-11-23 에 중단했습니다.
+  수신자를 바꾸거나 늘릴 때는 잡 이름과 사용자 ID만 바꿔 같은 형태로 만듭니다.
 - 봇 토큰은 Supabase Vault 시크릿 `cafe_ansik_slack_bot_token` 에서 읽습니다.
   토큰이 없으면 발송을 건너뛰고 `cafe_ansik_slack_report_log` 에 남깁니다.
 - 슬랙 앱 요구사항: Bot Token Scope `chat:write`, 봇을 채널에 초대 (`/invite @봇이름`)
@@ -61,7 +64,7 @@ npm run lint     # oxlint
 
 ```sql
 select public.cafe_ansik_send_slack_report('2026-09-01');  -- 특정 날짜 보고 (다시) 보내기
-select public.cafe_ansik_send_slack_report(p_channel => 'U0C1T1386SJ');  -- 어제 보고를 특정 사람에게 DM
+select public.cafe_ansik_send_slack_report(p_channel => 'U0CKV9H4S9H');  -- 어제 보고를 특정 사람에게 DM
 select public.cafe_ansik_check_slack_report();              -- 몇 초 뒤 Slack 응답 수집
 select * from public.cafe_ansik_slack_report_log order by id desc limit 10;
 ```
